@@ -1,3 +1,25 @@
+<p align="center">
+	本仓库修复了退格显示`^H`问题
+</p>
+
+**tips**
+
+> 安装默认已经启动
+
+```bash
+# 停止 openvpn
+$ service openvpn-server@server stop
+
+# 启动 openvpn
+$ service openvpn-server@server start
+
+# 重启 openvpn
+$ service openvpn-server@server restart
+```
+
+---
+---
+
 **New: [wireguard-install](https://github.com/Nyr/wireguard-install) is also available.**
 
 ## openvpn-install
