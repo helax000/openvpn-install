@@ -32,6 +32,7 @@ $ wget https://git.io/JJNMn -O /etc/openvpn/checkpsw.sh
 ```
 
 **tips3**
+
 **如果想使用集成（证书+密码 登陆）脚本，请直接运行此命令**
 ```bash
 $ wget https://git.io/JJNAu -O openvpn-install.sh && bash openvpn-install.sh
