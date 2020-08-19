@@ -222,7 +222,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 	[[ -z "$client" ]] && client="client"
 	# create folder
-	mkdir -p /etc/openvpn/
+	mkdir -p /etc/openvpn/server
 	touch /etc/openvpn/psw-file
 	echo
 	echo "OpenVPN installation is ready to begin."
@@ -362,6 +362,8 @@ crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	fi
 	# auth-user-pass
 	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+		touch /etc/openvpn/server/openvpn-password.log || exit 1
+		chmod +w /etc/openvpn/server/openvpn-password.log
 		cat > /etc/openvpn/checkpsw.sh<<-EOF
 #!/bin/sh
 ###########################################################
