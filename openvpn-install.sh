@@ -203,11 +203,13 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	[[ -z "$client" ]] && client="client"
 	# set username and password
 	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+		mkdir -p /etc/openvpn/
+		touch /etc/openvpn/psw-file
 		# username
 		echo
 		echo "Enter a username for this client: "
 		read -e -p "UserName [client]: " client_username
-		until [[ ! -n "$client_username" ]]; do
+		until [[ ! -z "$client_username" ]]; do
 			echo "$client_username: input value is null."
 			read -e -p "Enter a username for this client: " client_username
 		done
@@ -219,7 +221,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 			echo "$client_password: input value is null."
 			read -e -p "Enter a password for this client: " client_password
 		done
-		echo -e "\n${client_username} ${client_password}" >> /etc/openvpn/psw-file
+		echo -e "${client_username} ${client_password}\n" >> /etc/openvpn/psw-file
 	fi
 	echo
 	echo "OpenVPN installation is ready to begin."
@@ -397,7 +399,6 @@ EOF
 		chmod +x /etc/openvpn/checkpsw.sh
 		echo 'auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env' >> /etc/openvpn/server/server.conf
 		echo 'script-security 3' >> /etc/openvpn/server/server.conf
-		touch /etc/openvpn/psw-file
 	fi
 	# Enable net.ipv4.ip_forward for the system
 	echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/30-openvpn-forward.conf
