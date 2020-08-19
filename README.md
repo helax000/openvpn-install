@@ -2,8 +2,17 @@
 
 <p align="center"> 并增加了验证用户名和密码的脚本文件：checkpsw.sh </p>
 
-**tips**
+**tips1**
 
+> **如果遇到下载失败（拒绝连接）的问题，需要修改一下dns**
+```bash
+$ sudo vim /etc/resolv.conf
+```
+将 `nameserver 1.1.1.1` 添加到 nameserver 配置的第一行
+
+---
+
+**tips2**
 > 安装默认已经启动
 
 ```bash
