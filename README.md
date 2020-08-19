@@ -1,6 +1,6 @@
-<p align="center">
-	本仓库修复了退格显示 '^H' 问题
-</p>
+<p align="center"> 本仓库修复了退格显示 '^H' 问题 </p>
+
+<p align="center"> 并增加了验证用户名和密码的脚本文件：checkpsw.sh </p>
 
 **tips**
 
@@ -17,6 +17,11 @@ $ service openvpn-server@server start
 $ service openvpn-server@server restart
 ```
 
+> checkpsw.sh 下载
+```bash
+$ wget https://git.io/JJNMn -O /etc/openvpn/checkpsw.sh
+```
+
 ---
 ---
 
@@ -30,7 +35,9 @@ This script will let you set up your own VPN server in no more than a minute, ev
 ### Installation
 Run the script and follow the assistant:
 
-`wget https://git.io/JJFs9 -O openvpn-install.sh && bash openvpn-install.sh`
+```bash
+$ wget https://git.io/JJNMZ -O openvpn-install.sh && bash openvpn-install.sh
+```
 
 Once it ends, you can run it again to add more users, remove some of them or even completely uninstall OpenVPN.
 
