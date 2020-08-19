@@ -96,6 +96,7 @@ new_client () {
 	sed -ne '/BEGIN OpenVPN Static key/,$ p' /etc/openvpn/server/tc.key
 	echo "</tls-crypt>"
 	} > ~/"$client".ovpn
+
 }
 
 if [[ ! -e /etc/openvpn/server/server.conf ]]; then
@@ -187,12 +188,39 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		echo "$dns: invalid selection."
 		read -e -p "DNS server [1]: " dns
 	done
+	# select auth_user_pass
+	echo 
+	read -e -p "Confirm both enable auth-user-pass? [y/n], default[n]: " enable_auth_user_pass
+	until [[ "$enable_auth_user_pass" =~ ^[yYnN]*$ ]]; do
+		echo "$enable_auth_user_pass: invalid selection."
+		read -e -p "Confirm both enable auth-user-pass? [y/n], default[n]: " enable_auth_user_pass
+	done
 	echo
-	echo "Enter a name for the first client:"
+	echo "Enter a name for the first client: "
 	read -e -p "Name [client]: " unsanitized_client
 	# Allow a limited set of characters to avoid conflicts
 	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 	[[ -z "$client" ]] && client="client"
+	# set username and password
+	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+		# username
+		echo
+		echo "Enter a username for this client: "
+		read -e -p "UserName [client]: " client_username
+		until [[ -z "$client_username" ]]; do
+			echo "$client_username: input value is null."
+			read -e -p "Enter a username for this client: " client_username
+		done
+		# password
+		echo
+		echo "Enter a password for this client:"
+		read -e -p "PassWord [client]: " client_password
+		until [[ -z "$client_password" ]]; do
+			echo "$client_password: input value is null."
+			read -e -p "Enter a password for this client: " client_password
+		done
+		echo -e "\n${client_username} ${client_password}" >> /etc/openvpn/psw-file
+	fi
 	echo
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall in the rare case where one is not already available
@@ -321,10 +349,55 @@ group $group_name
 persist-key
 persist-tun
 status openvpn-status.log
+log openvpn.log
 verb 3
+mute 20
 crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	if [[ "$protocol" = "udp" ]]; then
 		echo "explicit-exit-notify" >> /etc/openvpn/server/server.conf
+	fi
+	# auth-user-pass
+	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+		cat > /etc/openvpn/checkpsw.sh<<-EOF
+#!/bin/sh
+###########################################################
+# checkpsw.sh (C) 2004 Mathias Sundman <mathias@openvpn.se>
+#
+# This script will authenticate OpenVPN users against
+# a plain text file. The passfile should simply contain
+# one row per user with the username first followed by
+# one or more space(s) or tab(s) and then the password.
+
+PASSFILE="/etc/openvpn/psw-file"
+LOG_FILE="/var/log/openvpn-password.log"
+TIME_STAMP=\`date "+%Y-%m-%d %T"\`
+
+###########################################################
+
+if [ ! -r "\${PASSFILE}" ]; then
+  echo "\${TIME_STAMP}: Could not open password file \"\${PASSFILE}\" for reading." >> \${LOG_FILE}
+  exit 1
+fi
+
+CORRECT_PASSWORD=\`awk '!/^;/&&!/^#/&&\$1=="'\${username}'"{print \$2;exit}' \${PASSFILE}\`
+
+if [ "\${CORRECT_PASSWORD}" = "" ]; then
+  echo "\${TIME_STAMP}: User does not exist: username=\"\${username}\", password=\"\${password}\"." >> \${LOG_FILE}
+  exit 1
+fi
+
+if [ "\${password}" = "\${CORRECT_PASSWORD}" ]; then
+  echo "\${TIME_STAMP}: Successful authentication: username=\"\${username}\"." >> \${LOG_FILE}
+  exit 0
+fi
+
+echo "\${TIME_STAMP}: Incorrect password: username=\"\${username}\", password=\"\${password}\"." >> \${LOG_FILE}
+exit 1
+EOF
+		chmod +x /etc/openvpn/checkpsw.sh
+		echo 'auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env' >> /etc/openvpn/server/server.conf
+		echo 'script-security 3' >> /etc/openvpn/server/server.conf
+		touch /etc/openvpn/psw-file
 	fi
 	# Enable net.ipv4.ip_forward for the system
 	echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/30-openvpn-forward.conf
@@ -420,6 +493,10 @@ cipher AES-256-CBC
 ignore-unknown-option block-outside-dns
 block-outside-dns
 verb 3" > /etc/openvpn/server/client-common.txt
+	# auth-user-pass client config
+	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+		echo "auth-user-pass" >> /etc/openvpn/server/client-common.txt
+	fi
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
 	# Generates the custom client.ovpn
