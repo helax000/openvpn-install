@@ -94,7 +94,7 @@ new_client () {
 		echo
 		echo "Enter a password for this client:"
 		read -e -p "PassWord [client]: " client_password
-		until [[ ! -n "$client_password" ]]; do
+		until [[ ! -z "$client_password" ]]; do
 			echo "$client_password: password is null."
 			read -e -p "Enter a password for this client: " client_password
 		done
