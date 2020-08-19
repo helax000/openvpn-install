@@ -17,7 +17,7 @@ $ service openvpn-server@server start
 $ service openvpn-server@server restart
 ```
 
-> checkpsw.sh 下载
+> [checkpsw.sh](http://openvpn.se/files/other/checkpsw.sh) 下载
 ```bash
 $ wget https://git.io/JJNMn -O /etc/openvpn/checkpsw.sh
 ```
