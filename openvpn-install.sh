@@ -80,6 +80,26 @@ TUN needs to be enabled before running this installer."
 fi
 
 new_client () {
+	# set username and password
+	if [ ! -z "`grep "auth-user-pass-verify" /etc/openvpn/server/server.conf `" ]; then
+		# username
+		echo
+		echo "Enter a username for this client: "
+		read -e -p "UserName [client]: " client_username
+		until [[ ! -z "$client_username" ]]; do
+			echo "$client_username: username is null."
+			read -e -p "Enter a username for this client: " client_username
+		done
+		# password
+		echo
+		echo "Enter a password for this client:"
+		read -e -p "PassWord [client]: " client_password
+		until [[ ! -n "$client_password" ]]; do
+			echo "$client_password: password is null."
+			read -e -p "Enter a password for this client: " client_password
+		done
+		echo -e "${client_username} ${client_password}\n" >> /etc/openvpn/psw-file
+	fi
 	# Generates the custom client.ovpn
 	{
 	cat /etc/openvpn/server/client-common.txt
@@ -201,28 +221,9 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	# Allow a limited set of characters to avoid conflicts
 	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 	[[ -z "$client" ]] && client="client"
-	# set username and password
-	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
-		mkdir -p /etc/openvpn/
-		touch /etc/openvpn/psw-file
-		# username
-		echo
-		echo "Enter a username for this client: "
-		read -e -p "UserName [client]: " client_username
-		until [[ ! -z "$client_username" ]]; do
-			echo "$client_username: input value is null."
-			read -e -p "Enter a username for this client: " client_username
-		done
-		# password
-		echo
-		echo "Enter a password for this client:"
-		read -e -p "PassWord [client]: " client_password
-		until [[ ! -n "$client_password" ]]; do
-			echo "$client_password: input value is null."
-			read -e -p "Enter a password for this client: " client_password
-		done
-		echo -e "${client_username} ${client_password}\n" >> /etc/openvpn/psw-file
-	fi
+	# create folder
+	mkdir -p /etc/openvpn/
+	touch /etc/openvpn/psw-file
 	echo
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall in the rare case where one is not already available
