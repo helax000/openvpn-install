@@ -207,7 +207,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		echo
 		echo "Enter a username for this client: "
 		read -e -p "UserName [client]: " client_username
-		until [[ -z "$client_username" ]]; do
+		until [[ ! -n "$client_username" ]]; do
 			echo "$client_username: input value is null."
 			read -e -p "Enter a username for this client: " client_username
 		done
@@ -215,7 +215,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		echo
 		echo "Enter a password for this client:"
 		read -e -p "PassWord [client]: " client_password
-		until [[ -z "$client_password" ]]; do
+		until [[ ! -n "$client_password" ]]; do
 			echo "$client_password: input value is null."
 			read -e -p "Enter a password for this client: " client_password
 		done
