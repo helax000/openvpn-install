@@ -98,7 +98,7 @@ new_client () {
 			echo "$client_password: password is null."
 			read -e -p "Enter a password for this client: " client_password
 		done
-		echo -e "${client_username} ${client_password}\n" >> /etc/openvpn/psw-file
+		echo "${client_username} ${client_password}" >> /etc/openvpn/psw-file
 	fi
 	# Generates the custom client.ovpn
 	{
