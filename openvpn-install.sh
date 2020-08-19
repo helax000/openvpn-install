@@ -373,7 +373,7 @@ crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 # one or more space(s) or tab(s) and then the password.
 
 PASSFILE="/etc/openvpn/psw-file"
-LOG_FILE="/var/log/openvpn-password.log"
+LOG_FILE="/etc/openvpn/server/openvpn-password.log"
 TIME_STAMP=\`date "+%Y-%m-%d %T"\`
 
 ###########################################################
