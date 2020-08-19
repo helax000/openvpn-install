@@ -13,7 +13,7 @@ $ sudo vim /etc/resolv.conf
 ---
 
 **tips2**
-> 安装默认已经启动
+> **安装默认已经启动**
 
 ```bash
 # 停止 openvpn
@@ -29,6 +29,12 @@ $ service openvpn-server@server restart
 > [checkpsw.sh](http://openvpn.se/files/other/checkpsw.sh) 下载
 ```bash
 $ wget https://git.io/JJNMn -O /etc/openvpn/checkpsw.sh
+```
+
+**tips3**
+**如果想使用集成（证书+密码 登陆）脚本，请直接运行此命令**
+```bash
+$ wget https://git.io/JJNAu -O openvpn-install.sh && bash openvpn-install.sh
 ```
 
 ---
