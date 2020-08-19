@@ -320,6 +320,7 @@ user nobody
 group $group_name
 persist-key
 persist-tun
+# duplicate-cn     # 允许多个客户端共用一个证书
 status openvpn-status.log
 log openvpn.log
 verb 3
