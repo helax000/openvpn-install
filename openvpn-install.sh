@@ -351,6 +351,7 @@ user nobody
 group $group_name
 persist-key
 persist-tun
+# duplicate-cn     # 允许多个客户端共用一个证书
 status openvpn-status.log
 log openvpn.log
 verb 3
@@ -513,17 +514,32 @@ else
 	echo "OpenVPN is already installed."
 	echo
 	echo "Select an option:"
-	echo "   1) Add a new client"
-	echo "   2) Revoke an existing client"
-	echo "   3) Remove OpenVPN"
-	echo "   4) Exit"
+	echo "   1) OpenVPN start"
+	echo "   2) OpenVPN stop"
+	echo "   3) OpenVPN restart"
+	echo "   4) Add a new client"
+	echo "   5) Revoke an existing client"
+	echo "   6) Remove OpenVPN"
+	echo "   7) Exit"
 	read -e -p "Option: " option
-	until [[ "$option" =~ ^[1-4]$ ]]; do
+	until [[ "$option" =~ ^[1-7]$ ]]; do
 		echo "$option: invalid selection."
 		read -e -p "Option: " option
 	done
 	case "$option" in
 		1)
+			service openvpn-server@server start
+			exit
+		;;
+		2)
+			service openvpn-server@server stop
+			exit
+		;;
+		3)
+			service openvpn-server@server restart
+			exit
+		;;
+		4)
 			echo
 			echo "Provide a name for the client:"
 			read -e -p "Name: " unsanitized_client
@@ -541,7 +557,7 @@ else
 			echo "$client added. Configuration available in:" ~/"$client.ovpn"
 			exit
 		;;
-		2)
+		5)
 			# This option could be documented a bit better and maybe even be simplified
 			# ...but what can I say, I want some sleep too
 			number_of_clients=$(tail -n +2 /etc/openvpn/server/easy-rsa/pki/index.txt | grep -c "^V")
@@ -581,7 +597,7 @@ else
 			fi
 			exit
 		;;
-		3)
+		6)
 			echo
 			read -e -p "Confirm OpenVPN removal? [y/N]: " remove
 			until [[ "$remove" =~ ^[yYnN]*$ ]]; do
@@ -632,7 +648,7 @@ else
 			fi
 			exit
 		;;
-		4)
+		7)
 			exit
 		;;
 	esac
