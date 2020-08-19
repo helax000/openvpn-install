@@ -363,7 +363,7 @@ crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	# auth-user-pass
 	if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
 		touch /etc/openvpn/server/openvpn-password.log || exit 1
-		chmod +w /etc/openvpn/server/openvpn-password.log
+		chmod o+w /etc/openvpn/server/openvpn-password.log
 		cat > /etc/openvpn/checkpsw.sh<<-EOF
 #!/bin/sh
 ###########################################################
@@ -400,7 +400,7 @@ fi
 echo "\${TIME_STAMP}: Incorrect password: username=\"\${username}\", password=\"\${password}\"." >> \${LOG_FILE}
 exit 1
 EOF
-		chmod +x /etc/openvpn/checkpsw.sh
+		chmod o+x /etc/openvpn/checkpsw.sh
 		echo 'auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env' >> /etc/openvpn/server/server.conf
 		echo 'script-security 3' >> /etc/openvpn/server/server.conf
 	fi
