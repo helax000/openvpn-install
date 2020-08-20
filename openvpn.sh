@@ -582,6 +582,7 @@ Add_client(){
 }
 
 Revoke_client(){
+    check_OpenVPN
     # This option could be documented a bit better and maybe even be simplified
     # ...but what can I say, I want some sleep too
     number_of_clients=$(tail -n +2 /etc/openvpn/server/easy-rsa/pki/index.txt | grep -c "^V")
