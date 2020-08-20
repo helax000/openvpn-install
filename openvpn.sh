@@ -708,10 +708,6 @@ ${Separator_1}
  "
 menu_status
 echo && read -e -p "请输入数字 [1-12]：" num
-until [[ "$num" =~ ^[1-12]$ ]]; do
-    echo -e "${Error} 请输入正确的数字 [1-12]"
-    read -e -p "请输入数字 [1-12]：" num
-done
 case "$num" in
 	1)
 	Install_OpenVPN
@@ -748,5 +744,8 @@ case "$num" in
 	;;
 	12)
 	exit 0
+	;;
+	*)
+	echo -e "${Error} 请输入正确的数字 [1-12]"
 	;;
 esac
