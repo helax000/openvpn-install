@@ -729,6 +729,7 @@ case "$num" in
 	View_config
 	;;
 	4)
+	check_OpenVPN
 	echo -e "${Tip}暂不支持"
 	;;
 	5)
