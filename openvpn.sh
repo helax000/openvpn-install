@@ -586,9 +586,7 @@ Revoke_client(){
     # ...but what can I say, I want some sleep too
     number_of_clients=$(tail -n +2 /etc/openvpn/server/easy-rsa/pki/index.txt | grep -c "^V")
     if [[ "$number_of_clients" = 0 ]]; then
-        echo
-        echo "There are no existing clients!"
-        exit
+        echo -e "${Green_font_prefix}\nThere are no existing clients!\n${Font_color_suffix}" && exit 0
     fi
     echo
     echo "Select the client to revoke:"
@@ -636,28 +634,40 @@ View_OpenVPN_log(){
 
 View_Password_log(){
     check_OpenVPN
-    [[ ! -e ${password_log_file} ]] && echo -e "${Error} OpenVPN日志文件不存在 !" && exit 1
+    [[ ! -e ${password_log_file} ]] && echo -e "${Error} 当前用户验证方式无此日志文件 !" && exit 1
 	echo && echo -e "${Tip} 按 ${Red_font_prefix}Ctrl+C${Font_color_suffix} 终止查看日志" && echo -e "如果需要查看完整日志内容，请用 ${Red_font_prefix}cat ${password_log_file}${Font_color_suffix} 命令。" && echo
 	tail -f ${password_log_file}
 }
 
 Start_OpenVPN(){
     check_OpenVPN
-    service openvpn-server@server start && exit
+    service openvpn-server@server start
+    echo -e "openVPN starting...\n"
+    sleep 2s
+    menu_status
+    exit
 }
 
 Stop_OpenVPN(){
     check_OpenVPN
-    service openvpn-server@server stop && exit
+    service openvpn-server@server stop
+    echo -e "openVPN stopping...\n"
+    sleep 2s
+    menu_status
+    exit
 }
 
 Restart_OpenVPN(){
     check_OpenVPN
-    service openvpn-server@server restart && exit
+    service openvpn-server@server restart
+    echo -e "openVPN restarting...\n"
+    sleep 2s
+    menu_status
+    exit
 }
 
 check_pid(){
-	PID=`ps -ef |grep -v grep | grep /usr/sbin/openvpn |awk '{print $2}'`
+	PID=`ps -ef |grep -v grep | grep "/usr/sbin/openvpn" |awk '{print $2}'`
 }
 
 check_OpenVPN(){
