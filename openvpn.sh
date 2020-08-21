@@ -677,7 +677,7 @@ View_Password_log(){
 View_Password_file(){
     check_OpenVPN
     [[ $? -eq 1 ]] && return 1
-    [[ ! -e "/etc/openvpn/psw-file" ]] && echo -e "${Error} 当前用户验证方式无此文件 !" && return 1
+    [[ ! -e "/etc/openvpn/psw-file" ]] && echo -e "${Error} 当前用户验证方式无用户账号密码 !" && return 1
 	echo && echo -e "${Tip} 按 ${Red_font_prefix}Ctrl+C${Font_color_suffix} 终止查看日志" && echo -e "如果需要查看完整日志内容，请用 ${Red_font_prefix}cat ${password_log_file}${Font_color_suffix} 命令。" && echo
 	tail -f /etc/openvpn/psw-file
 }
@@ -738,8 +738,8 @@ main(){
   ${Green_font_prefix}8.${Font_color_suffix} 停止 openVPN
   ${Green_font_prefix}9.${Font_color_suffix} 重启 openVPN
  ${Green_font_prefix}10.${Font_color_suffix} 查看 openVPN 运行日志
- ${Green_font_prefix}11.${Font_color_suffix} 查看 openVPN 登陆日志(账号密码方式)
- ${Green_font_prefix}12.${Font_color_suffix} 查看 openVPN 用户账号(账号密码方式)
+ ${Green_font_prefix}11.${Font_color_suffix} 查看 openVPN 登陆日志
+ ${Green_font_prefix}12.${Font_color_suffix} 查看 openVPN 用户账号
 --------------------
  ${Green_font_prefix}13.${Font_color_suffix} 退出脚本
 "
