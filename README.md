@@ -1,8 +1,10 @@
-<p align="center"> 本仓库fork自[Nyr](https://github.com/Nyr/openvpn-install) </p>
+<p align="center"> 本仓库fork自Nyr </p>
 
-<p align="center"> 1. 变化：修复了退格显示 '^H' 问题 </p>
+<p align="center"> 变化：修复了退格显示 '^H' 问题 </p>
 
-<p align="center"> 2. 增加了验证用户名和密码的脚本文件：checkpsw.sh </p>
+<p align="center"> 增加了验证用户名和密码的脚本文件：checkpsw.sh </p>
+
+<p align="center"> 完整优化版见 authuser 分支 </p>
 
 **tips1**
 
