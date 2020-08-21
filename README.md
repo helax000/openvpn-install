@@ -1,10 +1,12 @@
-<p align="center"> 本仓库修复了退格显示 '^H' 问题 </p>
+<p align="center"> 本仓库fork自[Nyr](https://github.com/Nyr/openvpn-install) </p>
 
-<p align="center"> 并增加了验证用户名和密码的脚本文件：checkpsw.sh </p>
+<p align="center"> 1. 变化：修复了退格显示 '^H' 问题 </p>
+
+<p align="center"> 2. 增加了验证用户名和密码的脚本文件：checkpsw.sh </p>
 
 **tips1**
 
-> **如果遇到下载失败（拒绝连接）的问题，需要修改一下dns**
+> **如果遇到下载失败（拒绝连接）的问题，尝试修改dns后下载**
 ```bash
 $ sudo vim /etc/resolv.conf
 ```
@@ -28,15 +30,12 @@ $ service openvpn-server@server restart
 
 > [checkpsw.sh](http://openvpn.se/files/other/checkpsw.sh) 下载
 ```bash
-$ wget https://git.io/JJNMn -O /etc/openvpn/checkpsw.sh
+$ wget -N --no-check-certificate https://git.io/JJNMn -O /etc/openvpn/checkpsw.sh
 ```
 
 **tips3**
 
-**如果想使用集成（证书+密码 登陆）脚本，请直接运行此命令**
-```bash
-$ wget https://git.io/JJNAu -O openvpn-install.sh && bash openvpn-install.sh
-```
+**如果想使用集成（证书+密码 登陆），请切换到分支`authuser`或点击[这里](https://github.com/helax000/openvpn-install/tree/authuser)切换。**
 
 ---
 ---
@@ -52,7 +51,7 @@ This script will let you set up your own VPN server in no more than a minute, ev
 Run the script and follow the assistant:
 
 ```bash
-$ wget https://git.io/JJNMZ -O openvpn-install.sh && bash openvpn-install.sh
+$ wget -N --no-check-certificate https://git.io/JJNMZ -O openvpn-install.sh && bash openvpn-install.sh
 ```
 
 Once it ends, you can run it again to add more users, remove some of them or even completely uninstall OpenVPN.
