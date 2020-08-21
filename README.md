@@ -1,7 +1,7 @@
 ## openvpn-install.sh
 
 ### 说明
-*此分支下的`openvpn-install.sh`增加了用户是否选择 对用户名和密码的配置项*
+*此shell增加了 证书+密码 的用户验证方式*
 
 直接运行以下命令：
 ```bash
@@ -11,7 +11,7 @@ $ wget -N --no-check-certificate https://git.io/JJNAu -O openvpn-install.sh && b
 ## openvpn.sh
 
 ### 说明
-**此shell整合了以下功能，更方便使用**
+**此shell整合了以下功能，相较于`openvpn-install.sh`更加完善，更方便使用（推荐）**
 - 良好的用户界面
 - 两种用户登陆验证模式：:one: 证书, :two: 证书+账号
 - 支持证书与账号绑定，即账号只有在正确的证书下才有效 (模式:two:)
