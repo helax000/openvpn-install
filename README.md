@@ -11,7 +11,7 @@ $ wget -N --no-check-certificate https://git.io/JJNAu -O openvpn-install.sh && b
 ## openvpn.sh
 
 ### 预览
-![dashboard](./images/overview.png)
+![dashboard](./images/dashboard.png)
 
 ### 说明
 **此shell整合了以下功能，相较于`openvpn-install.sh`更加完善，更方便使用（推荐）**
