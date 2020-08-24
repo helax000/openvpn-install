@@ -8,6 +8,7 @@
 server_config_file="/etc/openvpn/server/server.conf"
 openvpn_log_file="/etc/openvpn/server/openvpn.log"
 password_log_file="/etc/openvpn/server/openvpn-password.log"
+password_file="/etc/openvpn/psw-file"
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]:${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]:${Font_color_suffix}"
@@ -220,10 +221,13 @@ Install_OpenVPN(){
     done
     # select auth_user_pass
     echo
-    read -e -p "Confirm both enable auth-user-pass? [y/N], default[n]: " enable_auth_user_pass
-    until [[ "$enable_auth_user_pass" =~ ^[yYnN]*$ ]]; do
+    echo "Select a validation type for user authentication:"
+    echo "   1) 证书"
+    echo "   2) 证书+账号"
+    read -e -p "validation type [1]: " enable_auth_user_pass
+    until [[ -z "$enable_auth_user_pass" || "$enable_auth_user_pass" =~ ^[1-2]$ ]]; do
         echo "$enable_auth_user_pass: invalid selection."
-        read -e -p "Confirm both enable auth-user-pass? [y/n], default[n]: " enable_auth_user_pass
+        read -e -p "validation type [1]: " enable_auth_user_pass
     done
     # create folder
     mkdir -p /etc/openvpn/server
@@ -364,7 +368,10 @@ crl-verify crl.pem" >> /etc/openvpn/server/server.conf
         echo "explicit-exit-notify" >> /etc/openvpn/server/server.conf
     fi
     # auth-user-pass
-    if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+    case "${enable_auth_user_pass}" in
+        1|"")
+        ;;
+        2)
         touch /etc/openvpn/server/openvpn-password.log || exit 1
         touch /etc/openvpn/psw-file || exit 1
         chmod o+w /etc/openvpn/server/openvpn-password.log
@@ -409,7 +416,8 @@ EOF
         chmod o+x /etc/openvpn/checkpsw.sh
         echo 'auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env' >> /etc/openvpn/server/server.conf
         echo 'script-security 3' >> /etc/openvpn/server/server.conf
-    fi
+        ;;
+    esac
     # Enable net.ipv4.ip_forward for the system
     echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/30-openvpn-forward.conf
     # Enable without waiting for a reboot or service restart
@@ -505,9 +513,13 @@ ignore-unknown-option block-outside-dns
 block-outside-dns
 verb 3" > /etc/openvpn/server/client-common.txt
     # auth-user-pass client config
-    if [[ "$enable_auth_user_pass" =~ ^[yY]$ ]]; then
+    case "${enable_auth_user_pass}" in
+        1|"")
+        ;;
+        2)
         echo "auth-user-pass" >> /etc/openvpn/server/client-common.txt
-    fi
+        ;;
+    esac
     # Enable and start the OpenVPN service
     systemctl enable --now openvpn-server@server.service
     echo
@@ -609,6 +621,20 @@ Add_client(){
     echo -e "${Info}${Green_font_prefix}client[${client}.ovpn] added. Configuration available in: /etc/openvpn/client/${client}.ovpn${Font_color_suffix}\n"
 }
 
+View_client(){
+    check_OpenVPN
+    [[ $? -eq 1 ]] && return 1
+    # This option could be documented a bit better and maybe even be simplified
+    # ...but what can I say, I want some sleep too
+    number_of_clients=$(tail -n +2 /etc/openvpn/server/easy-rsa/pki/index.txt | grep -c "^V")
+    if [[ "$number_of_clients" = 0 ]]; then
+        echo -e "\n${Tip}${Red_font_prefix}There are no existing clients!\n${Font_color_suffix}" && return 0
+    fi
+    echo
+    echo -e " ${Info}${Green_font_prefix}All clients:${Font_color_suffix}"
+    tail -n +2 /etc/openvpn/server/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | nl -s ') ' && echo
+}
+
 Revoke_client(){
     check_OpenVPN
     [[ $? -eq 1 ]] && return 1
@@ -678,7 +704,7 @@ View_Password_file(){
     check_OpenVPN
     [[ $? -eq 1 ]] && return 1
     [[ ! -e "/etc/openvpn/psw-file" ]] && echo -e "${Error} 当前用户验证方式无用户账号密码 !" && return 1
-	echo && echo -e "${Tip} 按 ${Red_font_prefix}Ctrl+C${Font_color_suffix} 终止查看日志" && echo -e "如果需要查看完整日志内容，请用 ${Red_font_prefix}cat ${password_log_file}${Font_color_suffix} 命令。" && echo
+	echo && echo -e "${Tip} 按 ${Red_font_prefix}Ctrl+C${Font_color_suffix} 终止查看日志" && echo -e "如果需要查看完整日志内容，请用 ${Red_font_prefix}cat ${password_file}${Font_color_suffix} 命令。" && echo
 	tail -f /etc/openvpn/psw-file
 }
 
@@ -723,7 +749,8 @@ check_OpenVPN(){
 # ------------------------------------------------------------------
 
 main(){
-    echo -e "  【openVPN 一键管理脚本】
+    echo -e "****************************
+  【openVPN 一键管理脚本】
 
   ${Green_font_prefix}1.${Font_color_suffix} 安装 openVPN
   ${Green_font_prefix}2.${Font_color_suffix} 卸载 openVPN
@@ -731,24 +758,25 @@ main(){
   ${Green_font_prefix}3.${Font_color_suffix} 查看 服务端配置
   ${Green_font_prefix}4.${Font_color_suffix} 修改 服务端配置
 --------------------
-  ${Green_font_prefix}5.${Font_color_suffix} 添加 客户端
-  ${Green_font_prefix}6.${Font_color_suffix} 撤销 客户端
+  ${Green_font_prefix}5.${Font_color_suffix} 查看 客户端
+  ${Green_font_prefix}6.${Font_color_suffix} 添加 客户端
+  ${Green_font_prefix}7.${Font_color_suffix} 撤销 客户端
 --------------------
-  ${Green_font_prefix}7.${Font_color_suffix} 启动 openVPN
-  ${Green_font_prefix}8.${Font_color_suffix} 停止 openVPN
-  ${Green_font_prefix}9.${Font_color_suffix} 重启 openVPN
- ${Green_font_prefix}10.${Font_color_suffix} 查看 openVPN 运行日志
- ${Green_font_prefix}11.${Font_color_suffix} 查看 openVPN 登陆日志
- ${Green_font_prefix}12.${Font_color_suffix} 查看 openVPN 用户账号
+  ${Green_font_prefix}8.${Font_color_suffix} 启动 openVPN
+  ${Green_font_prefix}9.${Font_color_suffix} 停止 openVPN
+ ${Green_font_prefix}10.${Font_color_suffix} 重启 openVPN
+ ${Green_font_prefix}11.${Font_color_suffix} 查看 openVPN 运行日志
+ ${Green_font_prefix}12.${Font_color_suffix} 查看 openVPN 登陆日志
+ ${Green_font_prefix}13.${Font_color_suffix} 查看 openVPN 用户账号
 --------------------
- ${Green_font_prefix}13.${Font_color_suffix} 退出脚本
+ ${Green_font_prefix}14.${Font_color_suffix} 退出脚本
 "
 }
 menu_status
 while true
 do
     main
-    read -e -p "请输入数字 [1-13]：" num
+    read -e -p "请输入数字 [1-14]：" num
     case "$num" in
         1)
         Install_OpenVPN
@@ -760,37 +788,40 @@ do
         View_config
         ;;
         4)
-        echo -e "${Tip}暂不支持"
+        echo -e "\n${Tip}暂不支持\n"
         ;;
         5)
-        Add_client
+        View_client
         ;;
         6)
-        Revoke_client
+        Add_client
         ;;
         7)
-        Start_OpenVPN
+        Revoke_client
         ;;
         8)
-        Stop_OpenVPN
+        Start_OpenVPN
         ;;
         9)
-        Restart_OpenVPN
+        Stop_OpenVPN
         ;;
         10)
-        View_OpenVPN_log
+        Restart_OpenVPN
         ;;
         11)
-        View_Password_log
+        View_OpenVPN_log
         ;;
         12)
-        View_Password_file
+        View_Password_log
         ;;
         13)
+        View_Password_file
+        ;;
+        14)
         exit 0
         ;;
         *)
-        echo -e "${Error} 请输入正确的数字 [1-12]"
+        echo -e "${Error} 请输入正确的数字 [1-14]"
         ;;
     esac
 done
